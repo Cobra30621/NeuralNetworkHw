@@ -12,6 +12,9 @@ class Perceptron:
         self.accuracy_list = []
         self.y_set = y_set
 
+        self.train_accuracy = 0
+        self.test_accuracy = 0
+
     def fit(self, X_train, y_train):
         # Adding bias input (1) to each training sample
         X_train = np.append(X_train, - np.ones((X_train.shape[0], 1)), axis=1)
@@ -28,26 +31,43 @@ class Perceptron:
             accuracy = np.mean(y_preds == y_train)
             self.accuracy_list.append(accuracy)
 
+        self.train_accuracy = max(self.accuracy_list)
+
+    def evaluate_accuracy(self, X_test, y_test):
+        # Adding bias input (1) to each test sample
+        X_test = np.append(X_test, np.ones((X_test.shape[0], 1)), axis=1)
+        y_preds = self._step(np.dot(X_test, self.weights))
+        accuracy = np.mean(y_preds == y_test)
+        self.test_accuracy = accuracy
+        return accuracy
+
     def predict(self, x):
         return self._step(np.dot(x, self.weights))
 
     def _step(self, x):
         return np.where(x >= 0, self.y_set[0], self.y_set[1])
 
-    def plot_decision_boundary(self, X_test, y_test):
+    def plot_decision_boundary(self, ax, X_test, y_test):
+        # Create figure and axis object
+        # fig, ax = plt.subplots()
+
         # Plot data points
-        plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='jet', marker='o')
+        ax.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='jet', marker='o')
 
         # Compute decision boundary
         x_min, x_max = X_test[:, 0].min() - 1, X_test[:, 0].max() + 1
         y_min, y_max = ((self.weights[0] * x_min - self.weights[2]) / self.weights[1],
                         (self.weights[0] * x_max - self.weights[2]) / self.weights[1])
 
-        plt.plot([x_min, x_max], [y_min, y_max], 'k-')
+        ax.plot([x_min, x_max], [y_min, y_max], 'k-')
 
-        plt.xlim(X_test[:, 0].min() - 0.5, X_test[:, 0].max() + 0.5)
-        plt.ylim(X_test[:, 1].min() - 0.5, X_test[:, 1].max() + 0.5)
-        plt.show()
+        # Set axis limits
+        ax.set_xlim(X_test[:, 0].min() - 0.5, X_test[:, 0].max() + 0.5)
+        ax.set_ylim(X_test[:, 1].min() - 0.5, X_test[:, 1].max() + 0.5)
+
+        ax.plt.show()
+
+        return plt
 
     def plot_accuracy(self):
         plt.plot(self.accuracy_list)
@@ -55,6 +75,8 @@ class Perceptron:
         plt.ylabel("Training Accuracy")
         plt.title("Training Accuracy vs. Epochs")
         plt.show()
+
+
 
 # Example usage:
 if __name__ == "__main__":
