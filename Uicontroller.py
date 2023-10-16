@@ -1,5 +1,7 @@
 import sys
+import random
 
+import numpy as np
 from pyqt5_plugins.examplebutton import QtWidgets
 
 from DataParser import DataParser
@@ -24,7 +26,7 @@ class Uicontroller:
         window.show()
         self.ui = window.ui
         self.ui.trainButton.clicked.connect(self.train)
-        options = ['perceptron1.txt', 'perceptron2.txt', '2Ccircle1.txt', '2Circle1.txt', '2 Circle2.txt', '2CloseS.txt', '2CloseS2.txt', '2CloseS3.txt', '2cring.txt', '2CS.txt', '2Hcircle1.txt', '2ring.txt']
+        options = ['perceptron1.txt', 'perceptron2.txt', '2Ccircle1.txt', '2Circle1.txt',  '2CloseS.txt', '2CloseS2.txt', '2CloseS3.txt', '2cring.txt', '2CS.txt', '2Hcircle1.txt', '2ring.txt']
         self.ui.datasetComboBox.addItems(options )
         print("SetUI")
         sys.exit(app.exec_())
@@ -42,25 +44,22 @@ class Uicontroller:
         # print("Y_Set:", self.parser.Y_set)
 
         self.perceptron = Perceptron(learning_rate=learning_rate , epochs=epoch, y_set=self.parser.Y_set)
-        self. perceptron.fit(self.parser.X_train, self.parser.Y_train)
+        self.perceptron.fit(self.parser.X_train, self.parser.Y_train)
         self.perceptron.evaluate_accuracy(self.parser.X_test, self.parser.Y_test)
-        # Plot decision boundary
-        self.showOutcome()
-
-
-    def showOutcome(self):
-
-        print("train_accuracy", self.perceptron.train_accuracy)
-        print("test_accuracy", self.perceptron.test_accuracy)
-        print("weights", self.perceptron.weights)
 
         self.ui.weight_label.setText(str(self.perceptron.weights))
         self.ui.trainAccuracy_label.setText(str(self.perceptron.train_accuracy))
         self.ui.testAccuracy_label.setText(str(self.perceptron.test_accuracy))
 
         self.perceptron.plot_accuracy()
-        plot = self.ui.MplWidget.canvas.axes.plot
-        print("plot", plot)
-        self.perceptron.plot_decision_boundary(self.ui.MplWidget.canvas.axes, self.parser.X, self.parser.Y)
+
+        self.perceptron.plot_decision_boundary(self.ui.train_mplWidget.canvas, self.parser.X, self.parser.Y,
+                                               self.parser.X_train, self.parser.Y_train, "Train Data")
+        self.perceptron.plot_decision_boundary(self.ui.test_mplWidget.canvas, self.parser.X, self.parser.Y,
+                                               self.parser.X_test, self.parser.Y_test, "Test Data")
+
+
+
+
 
 

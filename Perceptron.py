@@ -28,6 +28,8 @@ class Perceptron:
 
             # After each epoch, evaluate the accuracy on training data
             y_preds = self._step(np.dot(X_train, self.weights))
+            # print("y_pred", y_preds)
+            # print("y_train", y_train)
             accuracy = np.mean(y_preds == y_train)
             self.accuracy_list.append(accuracy)
 
@@ -35,39 +37,39 @@ class Perceptron:
 
     def evaluate_accuracy(self, X_test, y_test):
         # Adding bias input (1) to each test sample
-        X_test = np.append(X_test, np.ones((X_test.shape[0], 1)), axis=1)
+        X_test = np.append(X_test, - np.ones((X_test.shape[0], 1)), axis=1)
         y_preds = self._step(np.dot(X_test, self.weights))
+        print(y_preds, y_test)
         accuracy = np.mean(y_preds == y_test)
         self.test_accuracy = accuracy
         return accuracy
 
-    def predict(self, x):
-        return self._step(np.dot(x, self.weights))
 
     def _step(self, x):
         return np.where(x >= 0, self.y_set[0], self.y_set[1])
 
-    def plot_decision_boundary(self, ax, X_test, y_test):
-        # Create figure and axis object
-        # fig, ax = plt.subplots()
+    def plot_decision_boundary(self, canvas, all_X, all_Y, x, y, title):
+        ax = canvas.axes
+        ax.clear()
 
-        # Plot data points
-        ax.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='jet', marker='o')
+        ax.scatter(x[:, 0], x[:, 1], c=y, cmap='jet', marker='o')
 
         # Compute decision boundary
-        x_min, x_max = X_test[:, 0].min() - 1, X_test[:, 0].max() + 1
-        y_min, y_max = ((self.weights[0] * x_min - self.weights[2]) / self.weights[1],
-                        (self.weights[0] * x_max - self.weights[2]) / self.weights[1])
+        x_min, x_max = all_X[:, 0].min() - 1, all_X[:, 0].max() + 1
+        y_min, y_max = (-(self.weights[0] * x_min - self.weights[2]) / self.weights[1],
+                        -(self.weights[0] * x_max - self.weights[2]) / self.weights[1])
 
         ax.plot([x_min, x_max], [y_min, y_max], 'k-')
 
         # Set axis limits
-        ax.set_xlim(X_test[:, 0].min() - 0.5, X_test[:, 0].max() + 0.5)
-        ax.set_ylim(X_test[:, 1].min() - 0.5, X_test[:, 1].max() + 0.5)
+        ax.set_xlim(all_X[:, 0].min() - 0.5, all_X[:, 0].max() + 0.5)
+        ax.set_ylim(all_X[:, 1].min() - 0.5, all_X[:, 1].max() + 0.5)
 
-        ax.plt.show()
+        ax.set_title(title)
 
-        return plt
+        canvas.draw()
+
+        # return plt
 
     def plot_accuracy(self):
         plt.plot(self.accuracy_list)
